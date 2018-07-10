@@ -65,13 +65,26 @@ function workWithData($linkToDive) {
     $html = getContentElumatingBrowser($linkToDive);
 //    var_dump($html->find('.provider-base-info', 0)->find('h3'));
     foreach($html->find('.provider-row') as $div){
-        // urlOnSource
-        echo $div->find('a', 0)->href."\n";
+
         // company
-        echo $div->find('a', 1)->plaintext."\n";
+        $company = $div->find('a', 1)->href;
+        // urlOnSource
+        $urlOnSource = $div->find('a', 0)->href;
         // website
-        echo $div->find('a', 7)->href."\n";
-        echo "   \n";
+        $website = $div->find('a', 7)->href;
+
+        if(returnRowUrl($company)==0){
+            insertRow($company, $urlOnSource, $website);
+        }
+
+//        OLD CODE
+//        // company
+//        echo $div->find('a', 1)->plaintext."\n";
+//        // urlOnSource
+//        echo $div->find('a', 0)->href."\n";
+//        // website
+//        echo $div->find('a', 7)->href."\n";
+//        echo "   \n";
    }
 }
 
