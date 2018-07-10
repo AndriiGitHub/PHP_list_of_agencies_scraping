@@ -54,7 +54,7 @@ function returnRowUrl($company){
 // takes argument $html object from CURL
 // inserts into DB
 // this one is hardcoded for Clutch
-function insertDataintoDB($html) {
+function insertDataIntoDB($html) {
     foreach($html->find('.provider-row') as $div){
         // company
         $company = $div->find('a', 1)->href;
@@ -77,10 +77,25 @@ function insertDataintoDB($html) {
     Specific for Clutch
 *************************************************************/
 // takes url as an argument
-function workWithData($url) {
-    $html = getContentElumatingBrowser($url);
-    // putting data into DB
-    insertDataintoDB($html);
+function workWithPages($url, $num_start_page, $num_end_page) {
+    // check for right arguments
+    if($num_start_page < $num_end_page){
+        echo "wrong pages numbers \n";
+        return false;
+    }
+    else if($num_start_page < 0 || $num_end_page < 0){
+        echo "wrong pages numbers \n";
+        return false;
+    }
+
+    // looping through pages
+    for($i = $num_start_page; $i =< $num_end_page; $i++){
+        $html = getContentElumatingBrowser($url);
+        // putting data into DB
+        insertDataIntoDB($html);
+        // setting delay before parsing next page
+        sleep(9);
+    }
 }
 
 /*************************************************************
