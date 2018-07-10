@@ -13,15 +13,8 @@ Written by Andrii Nebylovych
 require_once('simple_html_dom.php');
 // function for checking if the page is a product page
 
-// define domain to make site map. Should be without '/' in the end for now // TODO check for it in the end later.
-define('HOMEPAGE', 'https://www.agencyspotter.com');
-
 // define start url
-$START_URL = 'https://www.agencyspotter.com/search?location=New+York%2C+%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%2C+%D0%A1%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D1%96+%D0%A8%D1%82%D0%B0%D1%82%D0%B8+%D0%90%D0%BC%D0%B5%D1%80%D0%B8%D0%BA%D0%B8&budget_min=0&budget_mid=infinity&optradio=project&q=';
-// define('START_URL', 'http://www.pozitiff.site');
-// define ID to look for
-define('SPECIAL_ID', 'product-topinfo');
-
+$start_url = 'https://clutch.co/developers?page=0';
 /*************************************************************
     End of user defined settings.
 *************************************************************/
@@ -51,21 +44,18 @@ function insertRow($company, $urlOnSource, $website){
 
 function returnRowUrl($company){
     global $conn;
-    $sql = "SELECT url FROM arkansas WHERE url = '$company'";
+    $sql = "SELECT company FROM arkansas WHERE company = '$company'";
     $result = mysqli_query($conn, $sql);
     return $result;
 }
-
-
-
 /*************************************************************
     End of helpers functions
 *************************************************************/
-function workWithData($linkToDive) {
-    $html = getContentElumatingBrowser($linkToDive);
-//    var_dump($html->find('.provider-base-info', 0)->find('h3'));
+// takes argument $html object from CURL
+// inserts into DB
+// this one is hardcoded for Clutch
+function insertDataintoDB($html) {
     foreach($html->find('.provider-row') as $div){
-
         // company
         $company = $div->find('a', 1)->href;
         // urlOnSource
@@ -73,23 +63,28 @@ function workWithData($linkToDive) {
         // website
         $website = $div->find('a', 7)->href;
 
-        if(returnRowUrl($company)==0){
+        // insert into DB
+        // check if the company is already there
+        if(returnRowUrl($company)->num_rows === 0){
             insertRow($company, $urlOnSource, $website);
         }
-
-//        OLD CODE
-//        // company
-//        echo $div->find('a', 1)->plaintext."\n";
-//        // urlOnSource
-//        echo $div->find('a', 0)->href."\n";
-//        // website
-//        echo $div->find('a', 7)->href."\n";
-//        echo "   \n";
+        else {
+            echo "company is there already\n";
+        }
    }
+}
+/*************************************************************
+    Specific for Clutch
+*************************************************************/
+// takes url as an argument
+function workWithData($url) {
+    $html = getContentElumatingBrowser($url);
+    // putting data into DB
+    insertDataintoDB($html);
 }
 
 /*************************************************************
-    Specific for Clutch
+    working with pages
 *************************************************************/
 function getContentElumatingBrowser($url){
     $ch = curl_init($url);
@@ -109,7 +104,7 @@ function getContentElumatingBrowser($url){
     Partly emulate a browser
 *************************************************************/
 // INITIALIZATION
-workWithData('https://clutch.co/developers');
+workWithData($start_url);
 
 mysqli_close($conn);
 /*************************************************************
